@@ -1,0 +1,73 @@
+# ============================================================
+# .github/workflows/deploy.yml
+#
+# CI/CD Pipeline for Student Task Manager (IaC)
+#
+# Trigger:
+#   - On every push to the main branch      → full deploy
+#   - On every pull request to main branch  → plan only (no apply)
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   CLOUDFLARE_API_TOKEN   — Cloudflare API token with Workers & KV perms
+#   CLOUDFLARE_ACCOUNT_ID  — Your Cloudflare account ID
+#
+# Flow:
+#   git push → GitHub Actions → Terraform → Cloudflare
+# ============================================================
+
+name: Deploy Student Task Manager
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform IaC Deploy
+    runs-on: ubuntu-latest
+
+    # Pass GitHub Secrets as Terraform variable environment variables.
+    # TF_VAR_<name> is automatically picked up by Terraform as var.<name>.
+    env:
+      TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TF_VAR_account_id:           ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      # ── Step 1: Checkout the repository ──────────────────────────────────────
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: Install Terraform ─────────────────────────────────────────────
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      # ── Step 3: terraform init ────────────────────────────────────────────────
+      - name: Terraform Init
+        run: terraform init
+
+      # ── Step 4: terraform validate ────────────────────────────────────────────
+      - name: Terraform Validate
+        run: terraform validate
+
+      # ── Step 5: terraform plan ────────────────────────────────────────────────
+      # Always runs (for both push and PR) so you can review the plan.
+      - name: Terraform Plan
+        run: terraform plan -no-color -input=false
+        continue-on-error: true  # Plan failures shown but don't block
+
+      # ── Step 6: terraform apply ───────────────────────────────────────────────
+      # Only runs on actual push to main (not on PRs).
+      # -auto-approve skips the interactive confirmation prompt.
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -no-color -input=false

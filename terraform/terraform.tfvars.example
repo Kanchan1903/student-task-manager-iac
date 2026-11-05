@@ -1,0 +1,20 @@
+# ============================================================
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in your values.
+#
+# IMPORTANT: terraform.tfvars is listed in .gitignore and
+# must NEVER be committed to GitHub because it contains
+# your Cloudflare Account ID. The API token should ALWAYS
+# be passed via environment variable (TF_VAR_cloudflare_api_token)
+# or GitHub Secret — never written in this file.
+# ============================================================
+
+account_id        = "your-cloudflare-account-id-here"
+worker_name       = "student-task-manager"
+kv_namespace_name = "student_tasks"
+environment       = "production"
+
+# DO NOT add cloudflare_api_token here.
+# Set it as an environment variable instead:
+#   export TF_VAR_cloudflare_api_token="your-token-here"   (Linux/macOS)
+#   $env:TF_VAR_cloudflare_api_token="your-token-here"     (Windows PowerShell)
