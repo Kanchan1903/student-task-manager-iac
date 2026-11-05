@@ -22,7 +22,7 @@ resource "cloudflare_workers_kv_namespace" "tasks" {
 # The KV namespace binding (Resource 3) is defined inline
 # so the Worker can access TASKS_KV inside the script.
 # ----------------------------------------------------------
-resource "cloudflare_worker_script" "task_manager" {
+resource "cloudflare_workers_script" "task_manager" {
   account_id = var.account_id
   name       = "${var.worker_name}-${var.environment}"
   content    = file("${path.module}/../application/worker.js")

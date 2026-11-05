@@ -7,7 +7,7 @@
 
 output "worker_name" {
   description = "The name of the deployed Cloudflare Worker."
-  value       = cloudflare_worker_script.task_manager.name
+  value       = cloudflare_workers_script.task_manager.name
 }
 
 output "kv_namespace_id" {
@@ -22,7 +22,7 @@ output "kv_namespace_title" {
 
 output "application_url" {
   description = "The public URL of the deployed Student Task Manager application."
-  value       = "https://${cloudflare_worker_script.task_manager.name}.<your-subdomain>.workers.dev"
+  value       = "https://${cloudflare_workers_script.task_manager.name}.<your-subdomain>.workers.dev"
 }
 
 output "environment" {
